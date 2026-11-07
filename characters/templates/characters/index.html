@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог персонажей — Rick and Morty</title>
+    <style>
+        :root {
+            --bg: #07110d;
+            --panel: rgba(12, 35, 27, 0.82);
+            --panel-strong: #0e2b21;
+            --line: rgba(121, 255, 196, 0.16);
+            --text: #eafff5;
+            --muted: #8fb8a6;
+            --green: #7cffb2;
+            --cyan: #57e6d9;
+            --yellow: #ffe66d;
+            --red: #ff6b7a;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text);
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background:
+                radial-gradient(circle at 12% 8%, rgba(87, 230, 217, 0.13), transparent 28rem),
+                radial-gradient(circle at 88% 12%, rgba(124, 255, 178, 0.12), transparent 24rem),
+                radial-gradient(circle at 50% 110%, rgba(42, 148, 110, 0.18), transparent 30rem),
+                var(--bg);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.28;
+            background-image:
+                linear-gradient(rgba(124, 255, 178, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(124, 255, 178, 0.04) 1px, transparent 1px);
+            background-size: 64px 64px;
+            mask-image: radial-gradient(circle at 50% 30%, black, transparent 78%);
+        }
+
+        .page {
+            position: relative;
+            width: min(1240px, 100%);
+            margin: 0 auto;
+            padding: 52px 24px 64px;
+        }
+
+        .hero {
+            position: relative;
+            margin-bottom: 36px;
+            padding: 8px 0 0;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            border: 1px solid rgba(124, 255, 178, 0.35);
+            border-radius: 999px;
+            color: var(--green);
+            background: rgba(124, 255, 178, 0.07);
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .badge::before {
+            content: "";
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 12px var(--green);
+        }
+
+        h1 {
+            margin: 20px 0 12px;
+            font-size: clamp(2.2rem, 5.4vw, 4rem);
+            line-height: 1.04;
+            letter-spacing: -0.04em;
+            background: linear-gradient(115deg, #f4fff9 12%, var(--green) 55%, var(--cyan) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .subtitle {
+            max-width: 680px;
+            margin: 0;
+            color: var(--muted);
+            font-size: 1.02rem;
+            line-height: 1.65;
+        }
+
+        .stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 28px;
+        }
+
+        .stat {
+            min-width: 150px;
+            padding: 14px 18px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: rgba(9, 27, 21, 0.66);
+            backdrop-filter: blur(8px);
+        }
+
+        .stat strong {
+            display: block;
+            color: var(--green);
+            font-size: 1.35rem;
+            line-height: 1.1;
+        }
+
+        .stat span {
+            display: block;
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: 0.78rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(248px, 1fr));
+            gap: 22px;
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            background: linear-gradient(180deg, rgba(18, 49, 37, 0.9), rgba(8, 24, 19, 0.94));
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
+            transition: transform 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(124, 255, 178, 0.48);
+            box-shadow: 0 26px 52px rgba(0, 0, 0, 0.36), 0 0 0 1px rgba(124, 255, 178, 0.08);
+        }
+
+        .card__media {
+            position: relative;
+            aspect-ratio: 1 / 1;
+            overflow: hidden;
+            background: #0a241b;
+        }
+
+        .card__media img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .card:hover .card__media img {
+            transform: scale(1.06);
+        }
+
+        .card__media::after {
+            content: "";
+            position: absolute;
+            inset: auto 0 0;
+            height: 42%;
+            background: linear-gradient(transparent, rgba(7, 17, 13, 0.82));
+            pointer-events: none;
+        }
+
+        .status {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            z-index: 1;
+            padding: 6px 11px;
+            border: 1px solid transparent;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            backdrop-filter: blur(8px);
+        }
+
+        .status--alive {
+            color: #a8ffc9;
+            border-color: rgba(124, 255, 178, 0.42);
+            background: rgba(9, 48, 31, 0.82);
+        }
+
+        .status--dead {
+            color: #ffb3bb;
+            border-color: rgba(255, 107, 122, 0.42);
+            background: rgba(55, 14, 20, 0.82);
+        }
+
+        .status--unknown {
+            color: #ffeaa0;
+            border-color: rgba(255, 230, 109, 0.38);
+            background: rgba(50, 43, 10, 0.82);
+        }
+
+        .card__body {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            padding: 18px 18px 20px;
+        }
+
+        .card h2 {
+            margin: 0 0 6px;
+            font-size: 1.22rem;
+            line-height: 1.25;
+        }
+
+        .meta {
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.84rem;
+        }
+
+        .details {
+            display: grid;
+            gap: 10px;
+            margin-top: auto;
+            padding-top: 16px;
+        }
+
+        .detail {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 14px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(143, 184, 166, 0.12);
+            font-size: 0.82rem;
+        }
+
+        .detail span:first-child {
+            flex: 0 0 auto;
+            color: var(--muted);
+        }
+
+        .detail span:last-child {
+            color: #d9fff0;
+            text-align: right;
+            overflow-wrap: anywhere;
+        }
+
+        .error {
+            padding: 22px 24px;
+            border: 1px solid rgba(255, 107, 122, 0.4);
+            border-radius: 16px;
+            color: #ffd7db;
+            background: rgba(61, 14, 21, 0.55);
+            line-height: 1.6;
+        }
+
+        .footer {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 44px;
+            padding-top: 20px;
+            border-top: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 0.84rem;
+        }
+
+        .footer a {
+            color: var(--green);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .footer a:hover {
+            color: var(--cyan);
+        }
+
+        @media (max-width: 640px) {
+            .page {
+                padding: 32px 16px 44px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat {
+                flex: 1 1 130px;
+                min-width: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+<main class="page">
+    <header class="hero">
+        <div class="badge">Данные из Rick and Morty API</div>
+        <h1>Каталог персонажей</h1>
+        <p class="subtitle">
+            Вселенная мультивселенной в одном месте: персонажи, их вид, происхождение,
+            последняя известная локация и количество эпизодов. Данные загружаются
+            из открытого API при каждом открытии страницы.
+        </p>
+
+        <div class="stats">
+            <div class="stat">
+                <strong>{{ info.count|default:"—" }}</strong>
+                <span>всего персонажей</span>
+            </div>
+            <div class="stat">
+                <strong>{{ characters|length }}</strong>
+                <span>на этой странице</span>
+            </div>
+            <div class="stat">
+                <strong>{{ info.pages|default:"—" }}</strong>
+                <span>страниц в API</span>
+            </div>
+        </div>
+    </header>
+
+    {% if error %}
+        <div class="error">{{ error }}</div>
+    {% else %}
+        <section class="grid">
+            {% for character in characters %}
+                <article class="card">
+                    <div class="card__media">
+                        <img src="{{ character.image }}" alt="{{ character.name }}" loading="lazy">
+                        <span class="status {% if character.status == 'Alive' %}status--alive{% elif character.status == 'Dead' %}status--dead{% else %}status--unknown{% endif %}">
+                            {% if character.status == 'Alive' %}Жив{% elif character.status == 'Dead' %}Мёртв{% else %}Неизвестно{% endif %}
+                        </span>
+                    </div>
+                    <div class="card__body">
+                        <h2>{{ character.name }}</h2>
+                        <p class="meta">{{ character.species }} · {{ character.gender }}</p>
+
+                        <div class="details">
+                            <div class="detail">
+                                <span>Происхождение</span>
+                                <span>{{ character.origin.name }}</span>
+                            </div>
+                            <div class="detail">
+                                <span>Локация</span>
+                                <span>{{ character.location.name }}</span>
+                            </div>
+                            <div class="detail">
+                                <span>Эпизодов</span>
+                                <span>{{ character.episode|length }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            {% empty %}
+                <div class="error">API вернул пустой список персонажей.</div>
+            {% endfor %}
+        </section>
+    {% endif %}
+
+    <footer class="footer">
+        <span>Учебный проект на Django · данные обновляются при каждом запросе</span>
+        <a href="{{ api_url }}" target="_blank" rel="noreferrer">Источник: rickandmortyapi.com →</a>
+    </footer>
+</main>
+</body>
+</html>
